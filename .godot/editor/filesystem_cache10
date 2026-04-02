@@ -1,0 +1,15 @@
+63f7b34db8d8cdea90c76aacccf841ec
+::res://::1775083271
+CLAUDE.md::TextFile::-1::1775077774::0::1::::<><><>0<>0<><>::
+enemy_missile.gd::GDScript::7504232361165061768::1775081262::0::1::::<>Area2D<><>0<>0<><>::
+enemy_missile.tscn::PackedScene::6438697539483248692::1775081689::0::1::::<><><>0<>0<><>::res://enemy_missile.gd
+explosion.gd::GDScript::1579890654138359231::1775082242::0::1::::<>Node2D<><>0<>0<><>::
+explosion.tscn::PackedScene::3776408917615977119::1775082225::0::1::::<><><>0<>0<><>::res://explosion.gd
+icon.svg::CompressedTexture2D::965328755606191823::1775077815::1775078059::1::::<><><>0<>0<>7bd71e8ca933621c6ed105dbc7e17b6c<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
+launcher.gd::GDScript::1072199339265371549::1775079828::0::1::::<>Area2D<><>0<>0<><>::
+main.gd::GDScript::4342731910332163568::1775081755::0::1::::<>Node2D<><>0<>0<><>::
+main.tscn::PackedScene::4304676343808250605::1775081790::0::1::::<><><>0<>0<><>::res://main.gd
+missile.gd::GDScript::8192030645392495807::1775081776::0::1::::<>Area2D<><>0<>0<><>::
+missile.tscn::PackedScene::5912179138818361608::1775081649::0::1::::<><><>0<>0<><>::res://missile.gd
+sam_launcher.tscn::PackedScene::6626632875274845913::1775079931::0::1::::<><><>0<>0<><>::res://launcher.gd
+truck_launcher.tscn::PackedScene::4006915852149240987::1775080918::0::1::::<><><>0<>0<><>::res://launcher.gd

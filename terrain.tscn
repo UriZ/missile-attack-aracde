@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcx4k7n9m2qrs"]
+
+[ext_resource type="Script" path="res://terrain.gd" id="1_1"]
+
+[node name="Terrain" type="StaticBody2D"]
+script = ExtResource("1_1")
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.2, 0.25, 0.15, 1)
+polygon = PackedVector2Array(0, 0, 2560, 0, 2560, 200, 0, 200)
+
+[node name="Grass" type="Polygon2D" parent="."]
+color = Color(0.3, 0.4, 0.2, 1)
+polygon = PackedVector2Array(0, 0, 2560, 0, 2560, 20, 0, 20)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(0, 200, 0, 0, 2560, 0, 2560, 200)

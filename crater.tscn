@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://cx7y8n9wpqe4m"]
+
+[node name="Crater" type="Node2D"]
+
+[node name="OuterRim" type="Polygon2D" parent="."]
+color = Color(0.15, 0.15, 0.1, 1)
+polygon = PackedVector2Array(-20, -8, -15, -12, -8, -15, 0, -16, 8, -15, 15, -12, 20, -8, 20, 8, 15, 12, 8, 15, 0, 16, -8, 15, -15, 12, -20, 8)
+
+[node name="MiddleRim" type="Polygon2D" parent="."]
+color = Color(0.12, 0.12, 0.08, 1)
+polygon = PackedVector2Array(-15, -6, -10, -9, -6, -11, 0, -12, 6, -11, 10, -9, 15, -6, 15, 6, 10, 9, 6, 11, 0, 12, -6, 11, -10, 9, -15, 6)
+
+[node name="InnerCrater" type="Polygon2D" parent="."]
+color = Color(0.08, 0.08, 0.05, 1)
+polygon = PackedVector2Array(-10, -4, -7, -7, -4, -8, 0, -9, 4, -8, 7, -7, 10, -4, 10, 4, 7, 7, 4, 8, 0, 9, -4, 8, -7, 7, -10, 4)
+
+[node name="Scorch1" type="Polygon2D" parent="."]
+color = Color(0.05, 0.05, 0.03, 0.6)
+polygon = PackedVector2Array(-25, -3, -18, -8, -12, -5, -15, 0)
+
+[node name="Scorch2" type="Polygon2D" parent="."]
+color = Color(0.05, 0.05, 0.03, 0.6)
+polygon = PackedVector2Array(18, -8, 25, -3, 22, 2, 15, -2)
+
+[node name="Scorch3" type="Polygon2D" parent="."]
+color = Color(0.05, 0.05, 0.03, 0.6)
+polygon = PackedVector2Array(-8, 18, -3, 25, 3, 22, 0, 15)
+
+[node name="Debris1" type="Polygon2D" parent="."]
+color = Color(0.3, 0.25, 0.2, 1)
+polygon = PackedVector2Array(-30, 5, -28, 3, -26, 5, -28, 7)
+
+[node name="Debris2" type="Polygon2D" parent="."]
+color = Color(0.3, 0.25, 0.2, 1)
+polygon = PackedVector2Array(26, -6, 28, -8, 30, -6, 28, -4)
+
+[node name="Debris3" type="Polygon2D" parent="."]
+color = Color(0.3, 0.25, 0.2, 1)
+polygon = PackedVector2Array(5, 28, 7, 26, 9, 28, 7, 30)

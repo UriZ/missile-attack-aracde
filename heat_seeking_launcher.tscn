@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=3 uid="uid://d5x9w8vx3rbqh"]
+
+[ext_resource type="Script" path="res://launcher.gd" id="1_1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(70, 90)
+
+[node name="HeatSeekingLauncher" type="Area2D"]
+script = ExtResource("1_1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -15)
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.25, 0.25, 0.3, 1)
+polygon = PackedVector2Array(-30, 20, 30, 20, 30, -10, -30, -10)
+
+[node name="Platform" type="Polygon2D" parent="."]
+color = Color(0.35, 0.35, 0.4, 1)
+polygon = PackedVector2Array(-25, -10, 25, -10, 25, -20, -25, -20)
+
+[node name="Radar" type="Polygon2D" parent="."]
+color = Color(0.2, 0.6, 0.8, 1)
+polygon = PackedVector2Array(-15, -20, 15, -20, 10, -35, -10, -35)
+
+[node name="RadarDish" type="Polygon2D" parent="."]
+color = Color(0.3, 0.7, 0.9, 1)
+polygon = PackedVector2Array(-10, -35, 10, -35, 8, -40, -8, -40)
+
+[node name="MissileTube1" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.6, 1)
+polygon = PackedVector2Array(-18, -15, -14, -15, -14, -45, -18, -45)
+
+[node name="MissileTube2" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.6, 1)
+polygon = PackedVector2Array(-6, -15, -2, -15, -2, -45, -6, -45)
+
+[node name="MissileTube3" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.6, 1)
+polygon = PackedVector2Array(2, -15, 6, -15, 6, -45, 2, -45)
+
+[node name="MissileTube4" type="Polygon2D" parent="."]
+color = Color(0.4, 0.5, 0.6, 1)
+polygon = PackedVector2Array(14, -15, 18, -15, 18, -45, 14, -45)
+
+[node name="MissileTip1" type="Polygon2D" parent="."]
+color = Color(1, 1, 0.3, 1)
+polygon = PackedVector2Array(-18, -45, -16, -48, -14, -45)
+
+[node name="MissileTip2" type="Polygon2D" parent="."]
+color = Color(1, 1, 0.3, 1)
+polygon = PackedVector2Array(-6, -45, -4, -48, -2, -45)
+
+[node name="MissileTip3" type="Polygon2D" parent="."]
+color = Color(1, 1, 0.3, 1)
+polygon = PackedVector2Array(2, -45, 4, -48, 6, -45)
+
+[node name="MissileTip4" type="Polygon2D" parent="."]
+color = Color(1, 1, 0.3, 1)
+polygon = PackedVector2Array(14, -45, 16, -48, 18, -45)
+
+[node name="RadarLight" type="Polygon2D" parent="."]
+color = Color(0, 1, 0.5, 0.8)
+polygon = PackedVector2Array(-2, -38, 2, -38, 2, -36, -2, -36)
+
+[node name="SelectionRing" type="Polygon2D" parent="."]
+visible = false
+color = Color(0, 1, 0, 0.5)
+polygon = PackedVector2Array(-35, 25, 35, 25, 35, -50, -35, -50)

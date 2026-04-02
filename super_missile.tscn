@@ -1,0 +1,85 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3x9m8super1"]
+
+[ext_resource type="Script" path="res://super_missile.gd" id="1_1"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 14.0
+height = 80.0
+
+[node name="SuperMissile" type="Area2D"]
+script = ExtResource("1_1")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.25, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-14, 30, 14, 30, 14, -18, -14, -18)
+
+[node name="BodyStripe1" type="Polygon2D" parent="."]
+color = Color(0.8, 0.6, 0, 1)
+polygon = PackedVector2Array(-14, 10, 14, 10, 14, 5, -14, 5)
+
+[node name="BodyStripe2" type="Polygon2D" parent="."]
+color = Color(0.8, 0.6, 0, 1)
+polygon = PackedVector2Array(-14, 0, 14, 0, 14, -5, -14, -5)
+
+[node name="Nosecone" type="Polygon2D" parent="."]
+color = Color(0.9, 0.1, 0.05, 1)
+polygon = PackedVector2Array(-14, -18, 0, -40, 14, -18)
+
+[node name="WarheadBand" type="Polygon2D" parent="."]
+color = Color(0.7, 0.7, 0.1, 1)
+polygon = PackedVector2Array(-15, -16, 15, -16, 15, -19, -15, -19)
+
+[node name="FinLeft" type="Polygon2D" parent="."]
+color = Color(0.2, 0.15, 0.15, 1)
+polygon = PackedVector2Array(-14, 24, -24, 36, -14, 30)
+
+[node name="FinRight" type="Polygon2D" parent="."]
+color = Color(0.2, 0.15, 0.15, 1)
+polygon = PackedVector2Array(14, 24, 24, 36, 14, 30)
+
+[node name="FinCenter" type="Polygon2D" parent="."]
+color = Color(0.2, 0.15, 0.15, 1)
+polygon = PackedVector2Array(-4, 26, 4, 26, 4, 36, -4, 36)
+
+[node name="Parachute" type="Node2D" parent="."]
+visible = false
+position = Vector2(0, 34)
+
+[node name="Canopy" type="Polygon2D" parent="Parachute"]
+color = Color(0.85, 0.85, 0.8, 0.9)
+polygon = PackedVector2Array(-45, 0, -40, -20, -25, -32, 0, -38, 25, -32, 40, -20, 45, 0, 30, 4, 15, 6, 0, 7, -15, 6, -30, 4)
+
+[node name="CanopyStripe1" type="Polygon2D" parent="Parachute"]
+color = Color(0.9, 0.3, 0.1, 0.7)
+polygon = PackedVector2Array(-15, 1, -10, -30, 0, -35, 10, -30, 15, 1, 5, 4, 0, 5, -5, 4)
+
+[node name="CanopyStripe2" type="Polygon2D" parent="Parachute"]
+color = Color(0.9, 0.3, 0.1, 0.7)
+polygon = PackedVector2Array(-40, -10, -35, -22, -25, -28, -20, -18, -30, -5)
+
+[node name="CanopyStripe3" type="Polygon2D" parent="Parachute"]
+color = Color(0.9, 0.3, 0.1, 0.7)
+polygon = PackedVector2Array(40, -10, 35, -22, 25, -28, 20, -18, 30, -5)
+
+[node name="LineLeft" type="Line2D" parent="Parachute"]
+points = PackedVector2Array(-42, 0, -10, -35)
+width = 1.0
+default_color = Color(0.4, 0.4, 0.35, 0.8)
+
+[node name="LineRight" type="Line2D" parent="Parachute"]
+points = PackedVector2Array(42, 0, 10, -35)
+width = 1.0
+default_color = Color(0.4, 0.4, 0.35, 0.8)
+
+[node name="LineCenterL" type="Line2D" parent="Parachute"]
+points = PackedVector2Array(-20, -3, -5, -35)
+width = 1.0
+default_color = Color(0.4, 0.4, 0.35, 0.8)
+
+[node name="LineCenterR" type="Line2D" parent="Parachute"]
+points = PackedVector2Array(20, -3, 5, -35)
+width = 1.0
+default_color = Color(0.4, 0.4, 0.35, 0.8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_1")

@@ -17,6 +17,8 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0, 0.5)
 
 [node name="HeatSeekingMissile" type="Area2D"]
+monitoring = true
+monitorable = true
 script = ExtResource("1_1")
 
 [node name="Body" type="Polygon2D" parent="."]
@@ -35,10 +37,6 @@ polygon = PackedVector2Array(-8, 16, -16, 24, -8, 20)
 color = Color(0.2, 0.3, 0.5, 1)
 polygon = PackedVector2Array(8, 16, 16, 24, 8, 20)
 
-[node name="Seeker" type="Polygon2D" parent="."]
-color = Color(0.1, 0.8, 0.9, 1)
-polygon = PackedVector2Array(-4, -10, 4, -10, 4, -8, -4, -8)
-
 [node name="RocketFire" type="CPUParticles2D" parent="."]
 position = Vector2(0, 24)
 amount = 10
@@ -56,12 +54,6 @@ initial_velocity_max = 6.0
 scale_amount_min = 0.2
 scale_amount_max = 0.4
 color = Color(0.4, 0.7, 1, 1)
-
-[node name="LockIndicator" type="Line2D" parent="."]
-visible = false
-points = PackedVector2Array(-10, -30, 10, -30, 10, -20, -10, -20, -10, -30)
-width = 1.5
-default_color = Color(0, 1, 0, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_1")

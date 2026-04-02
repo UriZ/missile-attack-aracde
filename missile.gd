@@ -5,10 +5,32 @@ signal enemy_destroyed
 var velocity = Vector2.ZERO
 var gravity_force = 200  # pixels per second squared
 var explosion_scene = preload("res://explosion.tscn")
+var crater_scene = preload("res://crater.tscn")
 
 func _ready():
 	rotation = velocity.angle() + PI/2  # point missile in direction of travel
 	area_entered.connect(_on_area_entered)
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body):
+	if body.is_in_group("terrain"):
+		# Explode on terrain
+		var explosion = explosion_scene.instantiate()
+		explosion.position = position
+		get_parent().add_child(explosion)
+
+		# Small terrain damage from interceptor
+		if body.has_method("damage"):
+			body.damage(global_position, 40.0, 25.0)
+
+		# Small crater mark
+		var crater = crater_scene.instantiate()
+		crater.position = position
+		crater.scale = Vector2(1.0, 1.0)
+		crater.z_index = -1
+		get_parent().add_child(crater)
+
+		queue_free()
 
 func _on_area_entered(area):
 	if area.is_in_group("enemy_missiles"):

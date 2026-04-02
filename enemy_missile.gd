@@ -17,7 +17,7 @@ func _on_body_entered(body):
 	if body.is_in_group("terrain"):
 		# Damage the terrain
 		if body.has_method("damage"):
-			body.damage(global_position, 55.0, 40.0)
+			body.damage(global_position, 75.0, 55.0)
 
 		# Create explosion
 		var explosion = explosion_scene.instantiate()
@@ -27,6 +27,7 @@ func _on_body_entered(body):
 		# Create crater scorch marks
 		var crater = crater_scene.instantiate()
 		crater.position = position
+		crater.scale = Vector2(1.5, 1.5)
 		crater.z_index = -1  # Behind terrain
 		get_parent().add_child(crater)
 
@@ -39,7 +40,7 @@ func _on_area_entered(area):
 		var terrain_nodes = get_tree().get_nodes_in_group("terrain")
 		for terrain in terrain_nodes:
 			if terrain.has_method("damage"):
-				terrain.damage(area.global_position, 80.0, 60.0)
+				terrain.damage(area.global_position, 110.0, 80.0)
 
 		# Screen shake!
 		var main = get_tree().current_scene
@@ -53,7 +54,7 @@ func _on_area_entered(area):
 		# Create crater where launcher was
 		var crater = crater_scene.instantiate()
 		crater.position = area.global_position
-		crater.scale = Vector2(2, 2)  # Bigger crater for launcher destruction
+		crater.scale = Vector2(3, 3)  # Bigger crater for launcher destruction
 		crater.z_index = -1
 		get_parent().add_child(crater)
 

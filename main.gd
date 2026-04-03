@@ -23,9 +23,13 @@ var crosshair_locked_cursor = null
 var shake_amount = 0.0
 var shake_decay = 5.0  # How fast shake fades
 var play_button_tween: Tween = null
-var bg_missile_timer = 0.0
 
 func _ready():
+	# Load cover image at runtime (bypasses import system)
+	var img = Image.load_from_file("res://coverfinal.png")
+	if img:
+		$UI/StartScreen/CoverImage.texture = ImageTexture.create_from_image(img)
+
 	# Create crosshair cursors from code
 	crosshair_cursor = create_crosshair_texture(false)
 	crosshair_locked_cursor = create_crosshair_texture(true)
@@ -45,13 +49,6 @@ func _process(delta):
 	# Always process screen shake even during game over
 	apply_screen_shake(delta)
 
-	# Animate background missiles on start screen
-	if not game_started and not game_over and $UI/StartScreen.visible:
-		bg_missile_timer += delta
-		if bg_missile_timer >= 0.4:
-			bg_missile_timer = 0.0
-			spawn_bg_missile()
-
 	if game_over or not game_started:
 		return
 
@@ -60,6 +57,7 @@ func _process(delta):
 		selected_launcher = null
 		Input.set_custom_mouse_cursor(null)  # Reset cursor
 		$UI/Info.text = "Launcher destroyed! Select another launcher"
+		update_launcher_hud()
 
 	# Check for game over (all launchers destroyed)
 	var launchers = get_tree().get_nodes_in_group("launchers")
@@ -84,9 +82,9 @@ func _process(delta):
 		# Swap cursor based on lock
 		var enemy_near = find_enemy_near_cursor(get_global_mouse_position())
 		if enemy_near:
-			Input.set_custom_mouse_cursor(crosshair_locked_cursor, Input.CURSOR_ARROW, Vector2(16, 16))
+			Input.set_custom_mouse_cursor(crosshair_locked_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 		else:
-			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(16, 16))
+			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 		queue_redraw()
 	else:
 		queue_redraw()  # Clear crosshair
@@ -107,7 +105,7 @@ func shake_screen(intensity: float = 15.0):
 	shake_amount = max(shake_amount, intensity)
 
 func create_crosshair_texture(locked: bool = false) -> ImageTexture:
-	var size = 32
+	var size = 48
 	var center = size / 2
 	var img = Image.create(size, size, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))  # Transparent
@@ -121,24 +119,24 @@ func create_crosshair_texture(locked: bool = false) -> ImageTexture:
 		main_color = Color(0.9, 0.15, 0.1, 0.85)  # Red
 		shadow_color = Color(0.3, 0.05, 0.02, 0.6)  # Dark red
 
-	var thickness = 2 if locked else 1
+	var thickness = 2 if locked else 2
 
 	# Draw crosshair lines (horizontal)
-	for x in range(3, size - 3):
-		if abs(x - center) > 3:  # Gap in center
+	for x in range(4, size - 4):
+		if abs(x - center) > 5:  # Gap in center
 			for t in range(thickness):
 				img.set_pixel(x, center + t, main_color)
 				img.set_pixel(x, center - 1 - t, shadow_color)
 
 	# Draw crosshair lines (vertical)
-	for y in range(3, size - 3):
-		if abs(y - center) > 3:  # Gap in center
+	for y in range(4, size - 4):
+		if abs(y - center) > 5:  # Gap in center
 			for t in range(thickness):
 				img.set_pixel(center + t, y, main_color)
 				img.set_pixel(center - 1 - t, y, shadow_color)
 
 	# Draw center dot (bigger when locked)
-	var dot_size = 2 if locked else 1
+	var dot_size = 2 if locked else 2
 	for dx in range(-dot_size, dot_size + 1):
 		for dy in range(-dot_size, dot_size + 1):
 			var px = center + dx
@@ -147,59 +145,37 @@ func create_crosshair_texture(locked: bool = false) -> ImageTexture:
 				img.set_pixel(px, py, main_color)
 
 	# Draw corner brackets (thicker when locked)
-	var bracket_len = 5 if locked else 4
+	var bracket_len = 7 if locked else 6
 	for i in range(bracket_len):
 		for t in range(thickness):
 			# Top-left
-			img.set_pixel(2 + i, 2 + t, main_color)
-			img.set_pixel(2 + t, 2 + i, main_color)
+			img.set_pixel(3 + i, 3 + t, main_color)
+			img.set_pixel(3 + t, 3 + i, main_color)
 			# Top-right
-			img.set_pixel(size - 3 - i, 2 + t, main_color)
-			img.set_pixel(size - 3 - t, 2 + i, main_color)
+			img.set_pixel(size - 4 - i, 3 + t, main_color)
+			img.set_pixel(size - 4 - t, 3 + i, main_color)
 			# Bottom-left
-			img.set_pixel(2 + i, size - 3 - t, main_color)
-			img.set_pixel(2 + t, size - 3 - i, main_color)
+			img.set_pixel(3 + i, size - 4 - t, main_color)
+			img.set_pixel(3 + t, size - 4 - i, main_color)
 			# Bottom-right
-			img.set_pixel(size - 3 - i, size - 3 - t, main_color)
-			img.set_pixel(size - 3 - t, size - 3 - i, main_color)
+			img.set_pixel(size - 4 - i, size - 4 - t, main_color)
+			img.set_pixel(size - 4 - t, size - 4 - i, main_color)
 
 	return ImageTexture.create_from_image(img)
 
 func animate_start_screen():
-	var title = $UI/StartScreen/Title
-	var subtitle = $UI/StartScreen/Subtitle
 	var play_btn = $UI/StartScreen/PlayButton
 
-	# Hide everything initially
-	title.modulate.a = 0.0
-	title.position.y -= 60
-	subtitle.modulate.a = 0.0
 	play_btn.modulate.a = 0.0
 	play_btn.scale = Vector2(0.5, 0.5)
 	play_btn.pivot_offset = play_btn.size / 2
 
-	# Title: slide down + fade in
-	var title_tween = create_tween().set_parallel(true)
-	title_tween.tween_property(title, "modulate:a", 1.0, 0.8).set_ease(Tween.EASE_OUT)
-	title_tween.tween_property(title, "position:y", title.position.y + 60, 0.8).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-
-	# Title scale punch
-	var title_scale_tween = create_tween()
-	title.pivot_offset = title.size / 2
-	title_scale_tween.tween_property(title, "scale", Vector2(1.05, 1.05), 0.5).from(Vector2(0.8, 0.8)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.3)
-	title_scale_tween.tween_property(title, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_SINE)
-
-	# Subtitle: fade in after title
-	var sub_tween = create_tween()
-	sub_tween.tween_property(subtitle, "modulate:a", 1.0, 0.6).set_delay(0.7).set_ease(Tween.EASE_OUT)
-
 	# Play button: scale up + fade in with bounce
 	var btn_tween = create_tween().set_parallel(true)
-	btn_tween.tween_property(play_btn, "modulate:a", 1.0, 0.5).set_delay(1.2).set_ease(Tween.EASE_OUT)
-	btn_tween.tween_property(play_btn, "scale", Vector2(1.0, 1.0), 0.6).set_delay(1.2).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	btn_tween.tween_property(play_btn, "modulate:a", 1.0, 0.5).set_delay(0.3).set_ease(Tween.EASE_OUT)
+	btn_tween.tween_property(play_btn, "scale", Vector2(1.0, 1.0), 0.6).set_delay(0.3).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
-	# Play button: continuous pulse after appearing
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(1.2).timeout
 	if $UI/StartScreen.visible:
 		start_play_button_pulse()
 
@@ -210,30 +186,6 @@ func start_play_button_pulse():
 	play_button_tween = create_tween().set_loops()
 	play_button_tween.tween_property(play_btn, "scale", Vector2(1.08, 1.08), 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	play_button_tween.tween_property(play_btn, "scale", Vector2(1.0, 1.0), 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-
-func spawn_bg_missile():
-	# Decorative missiles falling in the background behind the start screen
-	var bg = $UI/StartScreen/Overlay
-	var missile_label = Label.new()
-	missile_label.text = ["🚀", "💥", "☄️"].pick_random()
-	missile_label.add_theme_font_size_override("font_size", randi_range(18, 36))
-	missile_label.modulate = Color(1, 1, 1, randf_range(0.15, 0.35))
-	missile_label.position = Vector2(randf_range(50, 2500), -40)
-	missile_label.rotation = randf_range(0.3, 1.2)
-	bg.add_child(missile_label)
-
-	var duration = randf_range(2.5, 5.0)
-	var end_x = missile_label.position.x + randf_range(-200, 200)
-	var fall_tween = create_tween().set_parallel(true)
-	fall_tween.tween_property(missile_label, "position:y", 1500.0, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	fall_tween.tween_property(missile_label, "position:x", end_x, duration)
-	fall_tween.tween_property(missile_label, "rotation", missile_label.rotation + randf_range(1.0, 3.0), duration)
-
-	# Cleanup after animation
-	get_tree().create_timer(duration + 0.5).timeout.connect(func():
-		if is_instance_valid(missile_label):
-			missile_label.queue_free()
-	)
 
 func _draw():
 	# Draw crosshair overlay for heat-seeking launcher
@@ -328,11 +280,12 @@ func _on_launcher_selected(launcher):
 		selected_launcher.set_selected(false)
 	selected_launcher = launcher
 	selected_launcher.set_selected(true)
+	update_launcher_hud()
 
 	# Change cursor based on launcher type
 	if launcher.name.begins_with("HeatSeekingLauncher"):
 		if crosshair_cursor:
-			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(16, 16))
+			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 		$UI/Info.text = "Heat-Seeking Launcher - aim at enemy missiles"
 	else:
 		Input.set_custom_mouse_cursor(null)  # Default cursor
@@ -384,6 +337,99 @@ func _on_enemy_destroyed():
 func update_score_display():
 	$UI/Score.text = "Score: " + str(score)
 
+func build_launcher_hud():
+	# Clear old HUD items
+	for child in $UI/LauncherHUD.get_children():
+		child.queue_free()
+	
+	var launchers = get_tree().get_nodes_in_group("launchers")
+	for i in range(launchers.size()):
+		var launcher = launchers[i]
+		var panel = PanelContainer.new()
+		panel.name = "LP_" + str(i)
+		
+		# Style the panel
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.15, 0.15, 0.2, 0.8)
+		style.border_color = Color(0.3, 0.3, 0.4, 0.6)
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(4)
+		style.set_content_margin_all(6)
+		panel.add_theme_stylebox_override("panel", style)
+		
+		var hbox = HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 6)
+		panel.add_child(hbox)
+		
+		# Launcher icon (colored square)
+		var icon = ColorRect.new()
+		icon.custom_minimum_size = Vector2(12, 12)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		
+		# Color by type
+		var launcher_name = launcher.name
+		if launcher_name.begins_with("SAM"):
+			icon.color = Color(0.2, 0.4, 0.8, 1)  # Blue
+		elif launcher_name.begins_with("Truck"):
+			icon.color = Color(0.3, 0.5, 0.3, 1)  # Green
+		elif launcher_name.begins_with("HeatSeeking"):
+			icon.color = Color(0.8, 0.5, 0.1, 1)  # Orange
+		hbox.add_child(icon)
+		
+		# Label with type + key hint
+		var label = Label.new()
+		var type_text = ""
+		if launcher_name.begins_with("SAM"):
+			type_text = "SAM"
+		elif launcher_name.begins_with("Truck"):
+			type_text = "TRUCK"
+		elif launcher_name.begins_with("HeatSeeking"):
+			type_text = "SEEKER"
+		label.text = str(i + 1) + " " + type_text
+		label.add_theme_font_size_override("font_size", 16)
+		label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
+		hbox.add_child(label)
+		
+		# Store ref
+		panel.set_meta("launcher_ref", launcher)
+		panel.set_meta("label_ref", label)
+		panel.set_meta("style_ref", style)
+		
+		$UI/LauncherHUD.add_child(panel)
+	
+	update_launcher_hud()
+
+func update_launcher_hud():
+	if not has_node("UI/LauncherHUD"):
+		return
+	for panel in $UI/LauncherHUD.get_children():
+		if not panel.has_meta("launcher_ref"):
+			continue
+		var launcher = panel.get_meta("launcher_ref")
+		var style: StyleBoxFlat = panel.get_meta("style_ref")
+		var label: Label = panel.get_meta("label_ref")
+		
+		if not is_instance_valid(launcher):
+			# Destroyed - dim it
+			style.bg_color = Color(0.3, 0.05, 0.05, 0.6)
+			style.border_color = Color(0.5, 0.1, 0.1, 0.4)
+			label.add_theme_color_override("font_color", Color(0.5, 0.2, 0.2, 0.6))
+			label.text = label.text.split(" ")[0] + " " + label.text.split(" ")[1] if label.text.split(" ").size() > 1 else label.text
+			if not label.text.ends_with(" ✕"):
+				label.text += " ✕"
+		elif launcher == selected_launcher:
+			# Selected - bright highlight
+			style.bg_color = Color(0.1, 0.25, 0.5, 0.9)
+			style.border_color = Color(0.3, 0.6, 1.0, 0.9)
+			style.set_border_width_all(2)
+			label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1))
+		else:
+			# Not selected - dim
+			style.bg_color = Color(0.15, 0.15, 0.2, 0.8)
+			style.border_color = Color(0.3, 0.3, 0.4, 0.6)
+			style.set_border_width_all(1)
+			label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
+
 func trigger_game_over():
 	game_over = true
 	$UI/GameOver.visible = true
@@ -429,9 +475,14 @@ func start_game():
 	# Spawn launchers
 	spawn_random_launchers()
 	update_score_display()
+	build_launcher_hud()
 	$UI/Info.text = "Click to fire from selected launcher"
 
 func clear_game():
+	# Clear launcher HUD
+	if has_node("UI/LauncherHUD"):
+		for child in $UI/LauncherHUD.get_children():
+			child.queue_free()
 	# Remove all game objects
 	for node in get_tree().get_nodes_in_group("enemy_missiles"):
 		node.queue_free()
@@ -448,10 +499,6 @@ func _on_play_pressed():
 	if play_button_tween:
 		play_button_tween.kill()
 		play_button_tween = null
-	# Clean up bg missiles
-	for child in $UI/StartScreen/Overlay.get_children():
-		if child is Label:
-			child.queue_free()
 	start_game()
 
 func _on_play_again_pressed():

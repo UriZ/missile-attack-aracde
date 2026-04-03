@@ -1,6 +1,39 @@
-[gd_scene load_steps=2 format=3 uid="uid://b2lhnjmxw7k5j"]
+[gd_scene load_steps=4 format=3 uid="uid://b2lhnjmxw7k5j"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
+bg_color = Color(0.75, 0.08, 0.08, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_right = 16.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0.9, 0.15, 0.1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_right = 16.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0.55, 0.05, 0.05, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_right = 16.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -23,6 +56,13 @@ offset_right = 200.0
 offset_bottom = 50.0
 theme_override_font_sizes/font_size = 24
 text = "Score: 0"
+
+[node name="LauncherHUD" type="HBoxContainer" parent="UI"]
+offset_left = 10.0
+offset_top = 50.0
+offset_right = 600.0
+offset_bottom = 110.0
+theme_override_constants/separation = 8
 
 [node name="Info" type="Label" parent="UI"]
 offset_left = 10.0
@@ -108,6 +148,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="CoverImage" type="TextureRect" parent="UI/StartScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Overlay" type="ColorRect" parent="UI/StartScreen"]
 layout_mode = 1
 anchors_preset = 15
@@ -115,44 +165,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.85)
-
-[node name="Title" type="Label" parent="UI/StartScreen"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -180.0
-offset_right = 300.0
-offset_bottom = -60.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 64
-text = "MISSILE ATTACK"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Subtitle" type="Label" parent="UI/StartScreen"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -50.0
-offset_right = 200.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 28
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-text = "Defend your launchers!"
-horizontal_alignment = 1
-vertical_alignment = 1
+color = Color(0, 0, 0, 0.3)
 
 [node name="PlayButton" type="Button" parent="UI/StartScreen"]
 layout_mode = 1
@@ -161,11 +174,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = 20.0
-offset_right = 120.0
-offset_bottom = 80.0
+offset_left = -140.0
+offset_top = -35.0
+offset_right = 140.0
+offset_bottom = 35.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 text = "PLAY"

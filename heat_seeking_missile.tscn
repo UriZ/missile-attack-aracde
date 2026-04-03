@@ -1,59 +1,76 @@
-[gd_scene load_steps=6 format=3 uid="uid://c8h5yx8yb3wbb"]
+[gd_scene load_steps=7 format=3 uid="uid://c8h5yx8yb3wbb"]
 
 [ext_resource type="Script" path="res://heat_seeking_missile.gd" id="1_1"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
-radius = 8.0
-height = 56.0
+radius = 11.0
+height = 64.0
 
-[sub_resource type="Gradient" id="Gradient_1"]
-offsets = PackedFloat32Array(0, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 0.3, 0, 0)
+[sub_resource type="Gradient" id="Gradient_tex"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.5, 0.8, 1, 0.5, 0.1, 0.4, 0.8, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
-gradient = SubResource("Gradient_1")
+gradient = SubResource("Gradient_tex")
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_flame"]
+offsets = PackedFloat32Array(0, 0.25, 0.55, 0.8, 1)
+colors = PackedColorArray(0.85, 0.98, 1, 1, 0.3, 0.85, 1, 1, 0.05, 0.5, 0.95, 0.8, 0.02, 0.2, 0.7, 0.35, 0, 0.05, 0.3, 0)
 
 [node name="HeatSeekingMissile" type="Area2D"]
 monitoring = true
 monitorable = true
 script = ExtResource("1_1")
 
+[node name="BodyGlow" type="Polygon2D" parent="."]
+color = Color(0.1, 0.6, 1.0, 0.2)
+polygon = PackedVector2Array(-14, 26, 14, 26, 14, -18, -14, -18)
+
 [node name="Body" type="Polygon2D" parent="."]
-color = Color(0.3, 0.4, 0.6, 1)
-polygon = PackedVector2Array(-8, 20, 8, 20, 8, -12, -8, -12)
+color = Color(0.3, 0.45, 0.72, 1)
+polygon = PackedVector2Array(-11, 22, 11, 22, 11, -16, -11, -16)
+
+[node name="BodyAccent" type="Polygon2D" parent="."]
+color = Color(0.2, 0.62, 0.88, 1)
+polygon = PackedVector2Array(-11, 2, 11, 2, 11, -4, -11, -4)
+
+[node name="SeekerRing" type="Polygon2D" parent="."]
+color = Color(0.15, 0.85, 0.95, 0.9)
+polygon = PackedVector2Array(-11, -13, 11, -13, 11, -16, -11, -16)
 
 [node name="Nosecone" type="Polygon2D" parent="."]
-color = Color(0.9, 0.9, 0.2, 1)
-polygon = PackedVector2Array(-8, -12, 0, -28, 8, -12)
+color = Color(0.92, 0.9, 0.18, 1)
+polygon = PackedVector2Array(-11, -16, 0, -36, 11, -16)
 
 [node name="FinLeft" type="Polygon2D" parent="."]
-color = Color(0.2, 0.3, 0.5, 1)
-polygon = PackedVector2Array(-8, 16, -16, 24, -8, 20)
+color = Color(0.22, 0.36, 0.62, 1)
+polygon = PackedVector2Array(-11, 14, -22, 26, -11, 22)
 
 [node name="FinRight" type="Polygon2D" parent="."]
-color = Color(0.2, 0.3, 0.5, 1)
-polygon = PackedVector2Array(8, 16, 16, 24, 8, 20)
+color = Color(0.22, 0.36, 0.62, 1)
+polygon = PackedVector2Array(11, 14, 22, 26, 11, 22)
 
 [node name="RocketFire" type="CPUParticles2D" parent="."]
-position = Vector2(0, 24)
-amount = 10
-lifetime = 0.06
-speed_scale = 2.0
+position = Vector2(0, 22)
+amount = 24
+lifetime = 0.5
+speed_scale = 1.5
 local_coords = true
 texture = SubResource("GradientTexture2D_1")
 emission_shape = 1
-emission_sphere_radius = 0.5
+emission_sphere_radius = 2.0
 direction = Vector2(0, 1)
-spread = 20.0
+spread = 14.0
 gravity = Vector2(0, 0)
-initial_velocity_min = 3.0
-initial_velocity_max = 6.0
-scale_amount_min = 0.2
-scale_amount_max = 0.4
-color = Color(0.4, 0.7, 1, 1)
+initial_velocity_min = 90.0
+initial_velocity_max = 170.0
+scale_amount_min = 0.25
+scale_amount_max = 0.48
+color = Color(1, 1, 1, 1)
+color_ramp = SubResource("Gradient_flame")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_1")

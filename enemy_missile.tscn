@@ -1,57 +1,74 @@
-[gd_scene format=3 uid="uid://cxy7n4m8qaqrs"]
+[gd_scene load_steps=7 format=3 uid="uid://cxy7n4m8qaqrs"]
 
 [ext_resource type="Script" path="res://enemy_missile.gd" id="1_1"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
-radius = 8.0
-height = 56.0
+radius = 12.0
+height = 68.0
 
-[sub_resource type="Gradient" id="Gradient_1"]
-offsets = PackedFloat32Array(0, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 0.3, 0, 0)
+[sub_resource type="Gradient" id="Gradient_tex"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.6, 0.1, 0.5, 0.8, 0.1, 0, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
-gradient = SubResource("Gradient_1")
+gradient = SubResource("Gradient_tex")
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0, 0.5)
 
+[sub_resource type="Gradient" id="Gradient_flame"]
+offsets = PackedFloat32Array(0, 0.2, 0.5, 0.75, 1)
+colors = PackedColorArray(1, 0.95, 0.7, 1, 1, 0.72, 0.05, 1, 1, 0.3, 0, 0.85, 0.85, 0.08, 0, 0.4, 0.3, 0.02, 0, 0)
+
 [node name="EnemyMissile" type="Area2D"]
 script = ExtResource("1_1")
 
+[node name="BodyGlow" type="Polygon2D" parent="."]
+color = Color(1.0, 0.25, 0.05, 0.22)
+polygon = PackedVector2Array(-16, 26, 16, 26, 16, -18, -16, -18)
+
 [node name="Body" type="Polygon2D" parent="."]
-color = Color(0.2, 0.15, 0.15, 1)
-polygon = PackedVector2Array(-8, 20, 8, 20, 8, -12, -8, -12)
+color = Color(0.52, 0.52, 0.36, 1)
+polygon = PackedVector2Array(-12, 22, 12, 22, 12, -16, -12, -16)
+
+[node name="BodyPanel" type="Polygon2D" parent="."]
+color = Color(0.44, 0.44, 0.3, 1)
+polygon = PackedVector2Array(-12, 8, 12, 8, 12, 2, -12, 2)
+
+[node name="WarheadBand" type="Polygon2D" parent="."]
+color = Color(0.88, 0.75, 0.08, 1)
+polygon = PackedVector2Array(-12, -13, 12, -13, 12, -17, -12, -17)
 
 [node name="Nosecone" type="Polygon2D" parent="."]
-color = Color(0.8, 0.1, 0.1, 1)
-polygon = PackedVector2Array(-8, -12, 0, -28, 8, -12)
+color = Color(0.92, 0.1, 0.06, 1)
+polygon = PackedVector2Array(-12, -16, 0, -38, 12, -16)
 
 [node name="FinLeft" type="Polygon2D" parent="."]
-color = Color(0.15, 0.1, 0.1, 1)
-polygon = PackedVector2Array(-8, 16, -16, 24, -8, 20)
+color = Color(0.38, 0.38, 0.26, 1)
+polygon = PackedVector2Array(-12, 14, -24, 28, -12, 22)
 
 [node name="FinRight" type="Polygon2D" parent="."]
-color = Color(0.15, 0.1, 0.1, 1)
-polygon = PackedVector2Array(8, 16, 16, 24, 8, 20)
+color = Color(0.38, 0.38, 0.26, 1)
+polygon = PackedVector2Array(12, 14, 24, 28, 12, 22)
 
 [node name="RocketFire" type="CPUParticles2D" parent="."]
-position = Vector2(0, 24)
-amount = 10
-lifetime = 0.06
-speed_scale = 2.0
+position = Vector2(0, 22)
+amount = 26
+lifetime = 0.5
+speed_scale = 1.5
 local_coords = true
 texture = SubResource("GradientTexture2D_1")
 emission_shape = 1
-emission_sphere_radius = 0.5
+emission_sphere_radius = 2.5
 direction = Vector2(0, 1)
-spread = 20.0
+spread = 14.0
 gravity = Vector2(0, 0)
-initial_velocity_min = 3.0
-initial_velocity_max = 6.0
-scale_amount_min = 0.2
-scale_amount_max = 0.4
-color = Color(1, 0.3, 0, 1)
+initial_velocity_min = 100.0
+initial_velocity_max = 180.0
+scale_amount_min = 0.28
+scale_amount_max = 0.52
+color = Color(1, 1, 1, 1)
+color_ramp = SubResource("Gradient_flame")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_1")

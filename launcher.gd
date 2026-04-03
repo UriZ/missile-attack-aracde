@@ -18,18 +18,22 @@ func _on_input_event(_viewport, event, _shape_idx):
 func _process(delta):
 	if not has_node("Turret"):
 		return
-	
+
 	var mouse_pos = get_global_mouse_position()
 	var direction = mouse_pos - global_position
-	
+
 	# Calculate target angle (0 = straight up)
 	var target_angle = direction.angle() + PI / 2
-	
+
 	# Clamp rotation to ±80 degrees from vertical
 	target_angle = clamp(target_angle, deg_to_rad(-80), deg_to_rad(80))
-	
+
 	# Smooth rotation
 	$Turret.rotation = lerp_angle($Turret.rotation, target_angle, 10.0 * delta)
+
+	# Spin radar dish independently if present
+	if has_node("Turret/RadarMast"):
+		$Turret/RadarMast.rotation += 1.8 * delta
 
 func set_selected(selected: bool):
 	is_selected = selected
@@ -54,6 +58,6 @@ func set_selected(selected: bool):
 
 func get_launch_position() -> Vector2:
 	if has_node("Turret"):
-		var tip_offset = Vector2(0, -56).rotated($Turret.rotation)
+		var tip_offset = Vector2(0, -62).rotated($Turret.rotation)
 		return global_position + tip_offset
 	return global_position

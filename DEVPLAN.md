@@ -4,20 +4,7 @@
 
 ---
 
-### 1. Crosshair Always Visible / Reactive Heat-Seeker Cursor
-**Status:** Planned
-
-- Show crosshair cursor at all times during gameplay (not just when heat-seeking launcher is selected)
-- Default crosshair: subtle, neutral color (e.g. dim white/gray)
-- When heat-seeking launcher is selected: crosshair becomes the current reactive red/locked variant
-- When an enemy is within lock range: crosshair snaps to red + locked state with the target ring drawn on screen
-- No cursor shown on start screen or game over screen
-
-**Files:** `main.gd` (cursor management, `_on_launcher_selected`, `_process`)
-
----
-
-### 2. Launcher Legend / HUD Overhaul
+### 1. Launcher Legend / HUD Overhaul
 **Status:** Planned
 
 - Replace the current launcher HUD panels with a clear, readable sidebar on the left
@@ -87,3 +74,4 @@
 - [x] Deformable terrain
 - [x] Screen shake
 - [x] Launcher selection HUD (basic)
+- [x] Crosshair always visible during gameplay; reactive for heat-seeker (default/heat/locked modes)

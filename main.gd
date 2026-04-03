@@ -18,6 +18,7 @@ var score = 0
 var crosshair_radius = 50.0  # Detection radius for heat-seeking lock
 var game_over = false
 var game_started = false
+var crosshair_default_cursor = null
 var crosshair_cursor = null
 var crosshair_locked_cursor = null
 var shake_amount = 0.0
@@ -31,8 +32,9 @@ func _ready():
 		$UI/StartScreen/CoverImage.texture = ImageTexture.create_from_image(img)
 
 	# Create crosshair cursors from code
-	crosshair_cursor = create_crosshair_texture(false)
-	crosshair_locked_cursor = create_crosshair_texture(true)
+	crosshair_default_cursor = create_crosshair_texture("default")
+	crosshair_cursor = create_crosshair_texture("heat")
+	crosshair_locked_cursor = create_crosshair_texture("locked")
 
 	# Hide game over screen initially
 	$UI/GameOver.visible = false
@@ -55,7 +57,6 @@ func _process(delta):
 	# Check if selected launcher was destroyed
 	if selected_launcher and not is_instance_valid(selected_launcher):
 		selected_launcher = null
-		Input.set_custom_mouse_cursor(null)  # Reset cursor
 		$UI/Info.text = "Launcher destroyed! Select another launcher"
 		update_launcher_hud()
 
@@ -77,17 +78,16 @@ func _process(delta):
 		super_missile_timer = 0.0
 		spawn_super_missile()
 
-	# Redraw crosshair if heat-seeking launcher selected
+	# Always update cursor during gameplay
 	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.name.begins_with("HeatSeekingLauncher"):
-		# Swap cursor based on lock
 		var enemy_near = find_enemy_near_cursor(get_global_mouse_position())
 		if enemy_near:
 			Input.set_custom_mouse_cursor(crosshair_locked_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 		else:
 			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
-		queue_redraw()
 	else:
-		queue_redraw()  # Clear crosshair
+		Input.set_custom_mouse_cursor(crosshair_default_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
+	queue_redraw()
 
 func apply_screen_shake(delta):
 	if shake_amount > 0.01:
@@ -104,60 +104,67 @@ func apply_screen_shake(delta):
 func shake_screen(intensity: float = 15.0):
 	shake_amount = max(shake_amount, intensity)
 
-func create_crosshair_texture(locked: bool = false) -> ImageTexture:
+func create_crosshair_texture(mode: String = "default") -> ImageTexture:
 	var size = 48
 	var center = size / 2
 	var img = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))  # Transparent
+	img.fill(Color(0, 0, 0, 0))
 
 	var main_color: Color
 	var shadow_color: Color
-	if locked:
-		main_color = Color(1, 0.2, 0.1, 1)  # Bright red
-		shadow_color = Color(1, 1, 0, 0.9)  # Yellow glow
-	else:
-		main_color = Color(0.9, 0.15, 0.1, 0.85)  # Red
-		shadow_color = Color(0.3, 0.05, 0.02, 0.6)  # Dark red
+	var thickness: int
+	var gap: int
+	var bracket_len: int
 
-	var thickness = 2 if locked else 2
+	match mode:
+		"default":
+			main_color = Color(0.88, 0.88, 0.88, 0.55)
+			shadow_color = Color(0.1, 0.1, 0.1, 0.3)
+			thickness = 1
+			gap = 5
+			bracket_len = 5
+		"heat":
+			main_color = Color(0.9, 0.15, 0.1, 0.9)
+			shadow_color = Color(0.3, 0.05, 0.02, 0.6)
+			thickness = 2
+			gap = 5
+			bracket_len = 6
+		"locked":
+			main_color = Color(1, 0.2, 0.1, 1)
+			shadow_color = Color(1, 1, 0, 0.9)
+			thickness = 2
+			gap = 5
+			bracket_len = 7
 
-	# Draw crosshair lines (horizontal)
+	# Crosshair lines
 	for x in range(4, size - 4):
-		if abs(x - center) > 5:  # Gap in center
+		if abs(x - center) > gap:
 			for t in range(thickness):
 				img.set_pixel(x, center + t, main_color)
 				img.set_pixel(x, center - 1 - t, shadow_color)
-
-	# Draw crosshair lines (vertical)
 	for y in range(4, size - 4):
-		if abs(y - center) > 5:  # Gap in center
+		if abs(y - center) > gap:
 			for t in range(thickness):
 				img.set_pixel(center + t, y, main_color)
 				img.set_pixel(center - 1 - t, y, shadow_color)
 
-	# Draw center dot (bigger when locked)
-	var dot_size = 2 if locked else 2
-	for dx in range(-dot_size, dot_size + 1):
-		for dy in range(-dot_size, dot_size + 1):
+	# Center dot
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
 			var px = center + dx
 			var py = center + dy
 			if px >= 0 and px < size and py >= 0 and py < size:
 				img.set_pixel(px, py, main_color)
 
-	# Draw corner brackets (thicker when locked)
-	var bracket_len = 7 if locked else 6
+	# Corner brackets
 	for i in range(bracket_len):
 		for t in range(thickness):
-			# Top-left
 			img.set_pixel(3 + i, 3 + t, main_color)
 			img.set_pixel(3 + t, 3 + i, main_color)
-			# Top-right
 			img.set_pixel(size - 4 - i, 3 + t, main_color)
 			img.set_pixel(size - 4 - t, 3 + i, main_color)
-			# Bottom-left
 			img.set_pixel(3 + i, size - 4 - t, main_color)
 			img.set_pixel(3 + t, size - 4 - i, main_color)
-			# Bottom-right
 			img.set_pixel(size - 4 - i, size - 4 - t, main_color)
 			img.set_pixel(size - 4 - t, size - 4 - i, main_color)
 
@@ -282,13 +289,9 @@ func _on_launcher_selected(launcher):
 	selected_launcher.set_selected(true)
 	update_launcher_hud()
 
-	# Change cursor based on launcher type
 	if launcher.name.begins_with("HeatSeekingLauncher"):
-		if crosshair_cursor:
-			Input.set_custom_mouse_cursor(crosshair_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 		$UI/Info.text = "Heat-Seeking Launcher - aim at enemy missiles"
 	else:
-		Input.set_custom_mouse_cursor(null)  # Default cursor
 		$UI/Info.text = "Launcher selected - click to fire"
 
 func spawn_missile(target_pos):
@@ -477,6 +480,7 @@ func start_game():
 	update_score_display()
 	build_launcher_hud()
 	$UI/Info.text = "Click to fire from selected launcher"
+	Input.set_custom_mouse_cursor(crosshair_default_cursor, Input.CURSOR_ARROW, Vector2(24, 24))
 
 func clear_game():
 	# Clear launcher HUD

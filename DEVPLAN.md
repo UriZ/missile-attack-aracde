@@ -76,6 +76,7 @@
 ### 7 ui fixes launchers and missiles
 - add wheels to the truck, and chains (lime in a tank) to the sam launcher
 - when blsting the mega missiles, i want to see a mega blast
+- when choosing a launcher, the crosshair should chaange to something hinting on selection
 
 
 ### 8 terrain improvements

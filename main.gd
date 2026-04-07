@@ -13,14 +13,15 @@ var suicide_drone_scene = preload("res://suicide_drone.tscn")
 var terrain_scene = preload("res://terrain.tscn")
 
 var selected_launcher = null
-var enemy_spawn_timer = 0.0
-var enemy_spawn_interval = 3.0  # spawn every 3 seconds
-var super_missile_timer = 0.0
-var super_missile_interval = 12.0  # spawn super missile every 12 seconds
-var drone_timer = 0.0
-var drone_interval = 20.0  # spawn drone every 20 seconds
-var suicide_drone_timer = 0.0
-var suicide_drone_interval = 35.0  # spawn suicide drone every 35 seconds
+
+# Wave system
+var wave_number = 0
+var wave_timer = 0.0
+var wave_events: Array = []        # [{time: float, type: String}] sorted ascending
+var wave_spawned_all = false       # true once all events for current wave are dispatched
+var in_between_wave = false
+var between_wave_timer = 0.0
+var between_wave_duration = 3.0
 var score = 0
 var crosshair_radius = 50.0  # Detection radius for heat-seeking lock
 var game_over = false
@@ -73,29 +74,18 @@ func _process(delta):
 		trigger_game_over()
 		return
 
-	# Spawn enemy missiles periodically
-	enemy_spawn_timer += delta
-	if enemy_spawn_timer >= enemy_spawn_interval:
-		enemy_spawn_timer = 0.0
-		spawn_enemy_missile()
-
-	# Spawn super missiles periodically
-	super_missile_timer += delta
-	if super_missile_timer >= super_missile_interval:
-		super_missile_timer = 0.0
-		spawn_super_missile()
-
-	# Spawn drones periodically
-	drone_timer += delta
-	if drone_timer >= drone_interval:
-		drone_timer = 0.0
-		spawn_drone()
-
-	# Spawn suicide drones periodically
-	suicide_drone_timer += delta
-	if suicide_drone_timer >= suicide_drone_interval:
-		suicide_drone_timer = 0.0
-		spawn_suicide_drone()
+	# Wave system
+	if in_between_wave:
+		between_wave_timer -= delta
+		if between_wave_timer <= 0.0:
+			in_between_wave = false
+			_start_wave(wave_number + 1)
+	else:
+		wave_timer += delta
+		while not wave_events.is_empty() and wave_events[0]["time"] <= wave_timer:
+			_spawn_wave_enemy(wave_events.pop_front()["type"])
+		if wave_events.is_empty() and get_tree().get_nodes_in_group("enemy_missiles").is_empty():
+			_on_wave_complete()
 
 	# Handle vulkan continuous fire
 	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.name.begins_with("VulkanCannon"):
@@ -333,6 +323,72 @@ func spawn_super_missile():
 	add_child(super_m)
 	super_m.launch_to(target, randf_range(8.0, 11.0))  # Very slow
 
+func _start_wave(n: int):
+	wave_number = n
+	wave_timer = 0.0
+	wave_events = _generate_wave_events(n)
+	wave_spawned_all = false
+	update_score_display()
+	_show_wave_banner("WAVE " + str(n), Color(1.0, 0.88, 0.2, 1.0))
+
+func _on_wave_complete():
+	in_between_wave = true
+	between_wave_timer = between_wave_duration
+	_show_wave_banner("WAVE " + str(wave_number) + " CLEAR", Color(0.4, 1.0, 0.55, 1.0))
+
+func _generate_wave_events(wave: int) -> Array:
+	var events = []
+
+	# Regular missiles — aggressive from wave 1, tight intervals
+	var missile_count: int = mini(8 + (wave - 1) * 2, 24)
+	var interval: float = maxf(0.8, 2.0 - (wave - 1) * 0.15)
+	for i in range(missile_count):
+		events.append({"time": i * interval, "type": "missile"})
+
+	# Super missiles: 1 from wave 1, scales up to 4
+	var super_count: int = clampi(1 + (wave - 1) / 2, 1, 4)
+	for i in range(super_count):
+		events.append({"time": 3.0 + i * 7.0, "type": "super_missile"})
+
+	# Patrol drones: 1 from wave 2, up to 4
+	var drone_count: int = clampi(wave - 1, 0, 4)
+	for i in range(drone_count):
+		events.append({"time": 4.0 + i * 8.0, "type": "drone"})
+
+	# Suicide drones: 1 from wave 3, up to 3
+	var suicide_count: int = clampi(wave - 2, 0, 3)
+	for i in range(suicide_count):
+		events.append({"time": 6.0 + i * 10.0, "type": "suicide_drone"})
+
+	events.sort_custom(func(a, b): return a["time"] < b["time"])
+	return events
+
+func _spawn_wave_enemy(type: String):
+	match type:
+		"missile":       spawn_enemy_missile()
+		"super_missile": spawn_super_missile()
+		"drone":         spawn_drone()
+		"suicide_drone": spawn_suicide_drone()
+
+func _show_wave_banner(text: String, color: Color):
+	var label = Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 82)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 7)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.position = Vector2(0, 620)
+	label.size = Vector2(2560, 180)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.modulate.a = 0.0
+	$UI.add_child(label)
+	var tween = create_tween()
+	tween.tween_property(label, "modulate:a", 1.0, 0.35)
+	tween.tween_interval(1.8)
+	tween.tween_property(label, "modulate:a", 0.0, 0.45)
+	tween.tween_callback(label.queue_free)
+
 func _on_launcher_selected(launcher):
 	if selected_launcher:
 		selected_launcher.set_selected(false)
@@ -391,7 +447,8 @@ func _on_enemy_destroyed():
 	update_score_display()
 
 func update_score_display():
-	$UI/Score.text = "Score: " + str(score)
+	var wave_str = "Wave " + str(max(1, wave_number))
+	$UI/Score.text = "Score: " + str(score) + "   " + wave_str
 
 func build_launcher_hud():
 	# Clear old HUD items
@@ -650,10 +707,12 @@ func start_game():
 	game_started = true
 	game_over = false
 	score = 0
-	enemy_spawn_timer = 0.0
-	super_missile_timer = 0.0
-	drone_timer = 0.0
-	suicide_drone_timer = 0.0
+	wave_number = 0
+	wave_timer = 0.0
+	wave_events = []
+	wave_spawned_all = false
+	in_between_wave = true
+	between_wave_timer = 2.5  # brief grace period before wave 1
 	selected_launcher = null
 
 	# Reset screen shake
@@ -669,6 +728,7 @@ func start_game():
 	var terrain = terrain_scene.instantiate()
 	terrain.position = Vector2(0, 1240)
 	add_child(terrain)
+	terrain.spawn_decorations()
 
 	# Spawn launchers
 	spawn_random_launchers()

@@ -9,9 +9,9 @@ var glow_tween: Tween = null
 
 # Overheat system
 var heat = 0.0           # 0.0 = cool, 1.0 = max
-var heat_per_shot = 0.04  # Each shot adds this much heat
-var cool_rate = 0.25      # Heat lost per second when not firing
-var overheat_cool_rate = 0.15  # Slower cooling when overheated
+var heat_per_shot = 0.018 # Each shot adds this much heat (~56 shots to overheat, ~3.9s)
+var cool_rate = 0.32      # Heat lost per second when not firing
+var overheat_cool_rate = 0.18  # Slower cooling when overheated
 var overheated = false    # Locked out when true
 var overheat_threshold = 1.0  # Heat level that triggers lockout
 var overheat_recover = 0.3    # Must cool to this level to recover

@@ -1,10 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://bt2k5yay8wpqd"]
+[gd_scene load_steps=7 format=3 uid="uid://bt2k5yay8wpqd"]
 
 [ext_resource type="Script" path="res://explosion.gd" id="1_1"]
 
 [sub_resource type="Gradient" id="Gradient_1"]
-offsets = PackedFloat32Array(0, 0.2, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.7, 1, 1, 1, 0)
+offsets = PackedFloat32Array(0, 0.15, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.95, 0.85, 0.8, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
 gradient = SubResource("Gradient_1")
@@ -18,55 +18,242 @@ _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 [sub_resource type="Curve" id="Curve_2"]
 _data = [Vector2(0, 0.3), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 
+[sub_resource type="Curve" id="Curve_3"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.15, 1), 0.0, 0.0, 0, 0, Vector2(0.6, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+
+[sub_resource type="Gradient" id="Gradient_2"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 1, 0.6, 1, 1, 0.6, 0.15, 1, 0.8, 0.2, 0.05, 0.8, 0.3, 0.1, 0.05, 0)
+
 [node name="Explosion" type="Node2D"]
 script = ExtResource("1_1")
 
 [node name="Flash" type="CPUParticles2D" parent="."]
 emitting = true
-amount = 3
-lifetime = 0.1
+amount = 5
+lifetime = 0.12
 one_shot = true
 explosiveness = 1.0
-randomness = 0.3
+randomness = 0.2
 texture = SubResource("GradientTexture2D_1")
 direction = Vector2(0, 0)
 spread = 180.0
 gravity = Vector2(0, 0)
 initial_velocity_min = 0.0
-initial_velocity_max = 10.0
+initial_velocity_max = 15.0
 angular_velocity_min = -360.0
 angular_velocity_max = 360.0
-scale_amount_min = 6.0
-scale_amount_max = 9.0
+scale_amount_min = 8.0
+scale_amount_max = 12.0
 scale_amount_curve = SubResource("Curve_1")
-color = Color(1, 1, 0.9, 1)
+color = Color(1, 1, 0.92, 1)
 
 [node name="CoreExplosion" type="CPUParticles2D" parent="."]
 emitting = true
-amount = 18
-lifetime = 0.18
+amount = 25
+lifetime = 0.25
 one_shot = true
-explosiveness = 0.85
+explosiveness = 0.9
 randomness = 0.5
 texture = SubResource("GradientTexture2D_1")
 direction = Vector2(0, 0)
 spread = 180.0
 gravity = Vector2(0, 0)
-initial_velocity_min = 40.0
-initial_velocity_max = 80.0
-angular_velocity_min = -720.0
-angular_velocity_max = 720.0
-damping_min = 50.0
-damping_max = 100.0
-scale_amount_min = 1.2
-scale_amount_max = 2.8
+initial_velocity_min = 50.0
+initial_velocity_max = 120.0
+angular_velocity_min = -900.0
+angular_velocity_max = 900.0
+damping_min = 60.0
+damping_max = 120.0
+scale_amount_min = 1.5
+scale_amount_max = 3.5
 scale_amount_curve = SubResource("Curve_2")
 color = Color(1, 0.85, 0.2, 1)
 
 [node name="FireParticles" type="CPUParticles2D" parent="."]
 emitting = true
-amount = 25
-lifetime = 0.3
+amount = 35
+lifetime = 0.4
+one_shot = true
+explosiveness = 0.75
+randomness = 0.6
+lifetime_randomness = 0.4
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 40)
+initial_velocity_min = 30.0
+initial_velocity_max = 70.0
+angular_velocity_min = -720.0
+angular_velocity_max = 720.0
+damping_min = 25.0
+damping_max = 65.0
+scale_amount_min = 1.0
+scale_amount_max = 2.8
+scale_amount_curve = SubResource("Curve_3")
+color = Color(1, 0.5, 0.1, 1)
+
+[node name="SecondaryFire" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 15
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.6
+randomness = 0.7
+lifetime_randomness = 0.5
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 90.0
+gravity = Vector2(0, 20)
+initial_velocity_min = 15.0
+initial_velocity_max = 45.0
+angular_velocity_min = -360.0
+angular_velocity_max = 360.0
+damping_min = 10.0
+damping_max = 30.0
+scale_amount_min = 1.2
+scale_amount_max = 2.5
+scale_amount_curve = SubResource("Curve_3")
+color = Color(1, 0.35, 0.08, 0.9)
+
+[node name="Sparks" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 45
+lifetime = 0.9
+one_shot = true
+explosiveness = 0.95
+randomness = 0.9
+lifetime_randomness = 0.6
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 170.0
+gravity = Vector2(0, 280)
+initial_velocity_min = 140.0
+initial_velocity_max = 350.0
+angular_velocity_min = -2200.0
+angular_velocity_max = 2200.0
+scale_amount_min = 0.12
+scale_amount_max = 0.45
+scale_amount_curve = SubResource("Curve_1")
+color = Color(1, 0.85, 0.3, 1)
+
+[node name="Embers" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 28
+lifetime = 1.3
+one_shot = true
+explosiveness = 0.75
+randomness = 0.85
+lifetime_randomness = 0.6
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 140.0
+gravity = Vector2(0, 45)
+initial_velocity_min = 35.0
+initial_velocity_max = 110.0
+angular_velocity_min = -500.0
+angular_velocity_max = 500.0
+damping_min = 4.0
+damping_max = 18.0
+scale_amount_min = 0.18
+scale_amount_max = 0.7
+scale_amount_curve = SubResource("Curve_1")
+color = Color(1, 0.55, 0.12, 0.95)
+
+[node name="SmokeParticles" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 18
+lifetime = 0.7
+one_shot = true
+explosiveness = 0.35
+randomness = 0.7
+lifetime_randomness = 0.5
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 55.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 12.0
+initial_velocity_max = 40.0
+angular_velocity_min = -200.0
+angular_velocity_max = 200.0
+orbit_velocity_min = 0.0
+orbit_velocity_max = 0.0
+damping_min = 5.0
+damping_max = 18.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+scale_amount_curve = SubResource("Curve_2")
+color = Color(0.28, 0.25, 0.22, 0.55)
+
+[node name="RisingSmoke" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 16
+lifetime = 1.6
+one_shot = true
+explosiveness = 0.12
+randomness = 0.85
+lifetime_randomness = 0.6
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 35.0
+gravity = Vector2(0, -40)
+initial_velocity_min = 10.0
+initial_velocity_max = 30.0
+angular_velocity_min = -100.0
+angular_velocity_max = 100.0
+damping_min = 2.0
+damping_max = 8.0
+scale_amount_min = 3.0
+scale_amount_max = 7.0
+scale_amount_curve = SubResource("Curve_2")
+color = Color(0.2, 0.2, 0.2, 0.3)
+
+[node name="Debris" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 35
+lifetime = 1.1
+one_shot = true
+explosiveness = 1.0
+randomness = 0.85
+lifetime_randomness = 0.5
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 380)
+initial_velocity_min = 120.0
+initial_velocity_max = 300.0
+angular_velocity_min = -2200.0
+angular_velocity_max = 2200.0
+scale_amount_min = 0.25
+scale_amount_max = 1.1
+scale_amount_curve = SubResource("Curve_1")
+color = Color(0.55, 0.45, 0.3, 1)
+
+[node name="MetalDebris" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 16
+lifetime = 1.2
+one_shot = true
+explosiveness = 0.95
+randomness = 0.9
+lifetime_randomness = 0.5
+texture = SubResource("GradientTexture2D_1")
+direction = Vector2(0, -1)
+spread = 150.0
+gravity = Vector2(0, 500)
+initial_velocity_min = 160.0
+initial_velocity_max = 380.0
+angular_velocity_min = -2800.0
+angular_velocity_max = 2800.0
+scale_amount_min = 0.1
+scale_amount_max = 0.55
+scale_amount_curve = SubResource("Curve_1")
+color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="GroundDust" type="CPUParticles2D" parent="."]
+emitting = true
+amount = 12
+lifetime = 0.6
 one_shot = true
 explosiveness = 0.7
 randomness = 0.6
@@ -74,84 +261,17 @@ lifetime_randomness = 0.4
 texture = SubResource("GradientTexture2D_1")
 direction = Vector2(0, 0)
 spread = 180.0
-gravity = Vector2(0, 30)
-initial_velocity_min = 20.0
-initial_velocity_max = 50.0
-angular_velocity_min = -540.0
-angular_velocity_max = 540.0
+gravity = Vector2(0, 10)
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+angular_velocity_min = -120.0
+angular_velocity_max = 120.0
 damping_min = 20.0
-damping_max = 60.0
-scale_amount_min = 0.8
-scale_amount_max = 2.2
-scale_amount_curve = SubResource("Curve_2")
-color = Color(1, 0.5, 0.1, 1)
-
-[node name="SmokeParticles" type="CPUParticles2D" parent="."]
-emitting = true
-amount = 12
-lifetime = 0.5
-one_shot = true
-explosiveness = 0.4
-randomness = 0.7
-lifetime_randomness = 0.5
-texture = SubResource("GradientTexture2D_1")
-direction = Vector2(0, -1)
-spread = 60.0
-gravity = Vector2(0, -15)
-initial_velocity_min = 10.0
-initial_velocity_max = 30.0
-angular_velocity_min = -180.0
-angular_velocity_max = 180.0
-orbit_velocity_min = 0.0
-orbit_velocity_max = 0.0
-damping_min = 5.0
-damping_max = 15.0
+damping_max = 50.0
 scale_amount_min = 1.5
-scale_amount_max = 4.0
+scale_amount_max = 3.5
 scale_amount_curve = SubResource("Curve_2")
-color = Color(0.25, 0.25, 0.25, 0.5)
-
-[node name="Debris" type="CPUParticles2D" parent="."]
-emitting = true
-amount = 20
-lifetime = 0.6
-one_shot = true
-explosiveness = 1.0
-randomness = 0.8
-lifetime_randomness = 0.4
-texture = SubResource("GradientTexture2D_1")
-direction = Vector2(0, 0)
-spread = 180.0
-gravity = Vector2(0, 300)
-initial_velocity_min = 80.0
-initial_velocity_max = 180.0
-angular_velocity_min = -1440.0
-angular_velocity_max = 1440.0
-scale_amount_min = 0.3
-scale_amount_max = 0.8
-scale_amount_curve = SubResource("Curve_1")
-color = Color(0.6, 0.5, 0.3, 1)
-
-[node name="MetalDebris" type="CPUParticles2D" parent="."]
-emitting = true
-amount = 8
-lifetime = 0.8
-one_shot = true
-explosiveness = 0.9
-randomness = 0.9
-lifetime_randomness = 0.5
-texture = SubResource("GradientTexture2D_1")
-direction = Vector2(0, -1)
-spread = 120.0
-gravity = Vector2(0, 400)
-initial_velocity_min = 120.0
-initial_velocity_max = 250.0
-angular_velocity_min = -2000.0
-angular_velocity_max = 2000.0
-scale_amount_min = 0.15
-scale_amount_max = 0.4
-scale_amount_curve = SubResource("Curve_1")
-color = Color(0.8, 0.8, 0.8, 1)
+color = Color(0.4, 0.35, 0.28, 0.4)
 
 [node name="Sound" type="AudioStreamPlayer2D" parent="."]
 volume_db = 0.0

@@ -25,9 +25,15 @@ var barrel_speed = 0.0    # Current spin speed in degrees/sec
 
 var vulkan_bullet_scene = preload("res://vulkan_bullet.tscn")
 
+# Sound state
+var fire_sound_player: AudioStreamPlayer2D = null
+var spool_player: AudioStreamPlayer2D = null
+
 func _ready():
 	add_to_group("launchers")
 	input_event.connect(_on_input_event)
+	_create_fire_sound()
+	_create_spool_sound()
 
 func _on_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -75,6 +81,13 @@ func _process(delta):
 	if has_node("Turret/BarrelGroup"):
 		$Turret/BarrelGroup.rotation = deg_to_rad(barrel_spin)
 
+	# === Spool sound follows barrel speed ===
+	if spool_player and is_instance_valid(spool_player):
+		var spool_ratio = clamp(barrel_speed / 1200.0, 0.0, 1.0)
+		spool_player.pitch_scale = 0.5 + spool_ratio * 1.0  # 0.5 → 1.5
+		var target_vol = -20.0 + spool_ratio * 18.0  # -20 → -2 dB
+		spool_player.volume_db = lerp(spool_player.volume_db, target_vol, 6.0 * delta)
+
 	# Heat glow visual (tints barrels, housing, muzzle)
 	update_heat_visual()
 
@@ -94,6 +107,108 @@ func fire_bullet():
 	var main = get_tree().current_scene
 	if main.has_method("shake_screen"):
 		main.shake_screen(0.8)
+
+	# Play fire sound (rapid click/crack per shot)
+	_play_shot_sound()
+
+# === Per-shot sound — tiny metallic crack ===
+func _play_shot_sound():
+	if not fire_sound_player or not is_instance_valid(fire_sound_player):
+		_create_fire_sound()
+	fire_sound_player.pitch_scale = randf_range(0.85, 1.15)
+	fire_sound_player.volume_db = randf_range(-3.0, 0.0)
+	fire_sound_player.play()
+
+# === Create reusable per-shot audio ===
+func _create_fire_sound():
+	var sample_rate = 22050
+	var duration = 0.06
+	var num_samples = int(sample_rate * duration)
+
+	var audio = AudioStreamWAV.new()
+	audio.format = AudioStreamWAV.FORMAT_16_BITS
+	audio.mix_rate = sample_rate
+	audio.stereo = false
+
+	var data = PackedByteArray()
+	data.resize(num_samples * 2)
+
+	for i in range(num_samples):
+		var t = float(i) / sample_rate
+
+		# Ultra-sharp attack, fast decay
+		var envelope = min(t / 0.001, 1.0) * exp(-60.0 * t)
+
+		# Sharp metallic crack
+		var crack = randf_range(-1.0, 1.0) * 0.8
+
+		# Brief metallic ring
+		var ring = sin(TAU * 1200.0 * t) * 0.3 * max(0.0, 1.0 - t / 0.02)
+
+		# Tiny bass punch
+		var punch = sin(TAU * 120.0 * t) * 0.25 * max(0.0, 1.0 - t / 0.015)
+
+		var sample_val = (crack + ring + punch) * envelope
+		sample_val = tanh(sample_val * 1.5) / tanh(1.5)
+
+		var int_val = int(sample_val * 24000)
+		data[i * 2] = int_val & 0xFF
+		data[i * 2 + 1] = (int_val >> 8) & 0xFF
+
+	audio.data = data
+
+	fire_sound_player = AudioStreamPlayer2D.new()
+	fire_sound_player.stream = audio
+	fire_sound_player.volume_db = -2.0
+	fire_sound_player.max_distance = 2000.0
+	add_child(fire_sound_player)
+
+# === Spool-up / spin-down motor whine ===
+func _create_spool_sound():
+	var sample_rate = 22050
+	var duration = 0.2  # Short loop
+	var num_samples = int(sample_rate * duration)
+
+	var audio = AudioStreamWAV.new()
+	audio.format = AudioStreamWAV.FORMAT_16_BITS
+	audio.mix_rate = sample_rate
+	audio.stereo = false
+	audio.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	audio.loop_begin = 0
+	audio.loop_end = num_samples
+
+	var data = PackedByteArray()
+	data.resize(num_samples * 2)
+
+	for i in range(num_samples):
+		var t = float(i) / sample_rate
+
+		# Mechanical whir — layered sine tones
+		var whir = sin(TAU * 180.0 * t) * 0.15
+		whir += sin(TAU * 360.0 * t) * 0.08  # 2nd harmonic
+		whir += sin(TAU * 540.0 * t) * 0.04  # 3rd harmonic
+
+		# Bearing rattle
+		var rattle = randf_range(-1.0, 1.0) * 0.05
+
+		# Motor hum
+		var hum = sin(TAU * 90.0 * t) * 0.08
+
+		var sample_val = whir + rattle + hum
+		sample_val = tanh(sample_val * 1.3) / tanh(1.3)
+
+		var int_val = int(sample_val * 18000)
+		data[i * 2] = int_val & 0xFF
+		data[i * 2 + 1] = (int_val >> 8) & 0xFF
+
+	audio.data = data
+
+	spool_player = AudioStreamPlayer2D.new()
+	spool_player.stream = audio
+	spool_player.volume_db = -20.0  # Start silent
+	spool_player.max_distance = 1800.0
+	add_child(spool_player)
+	spool_player.play()
 
 func update_heat_visual():
 	# Tint barrel tips red-hot when heated

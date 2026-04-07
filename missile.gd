@@ -15,7 +15,7 @@ func _ready():
 
 func play_launch_sound():
 	var sample_rate = 22050
-	var duration = 0.45
+	var duration = 0.55
 	var num_samples = int(sample_rate * duration)
 
 	var audio = AudioStreamWAV.new()
@@ -30,22 +30,36 @@ func play_launch_sound():
 		var t = float(i) / sample_rate
 		var progress = t / duration
 
-		# Sharp attack, exponential decay
-		var envelope = t / 0.008 if t < 0.008 else exp(-6.5 * (t - 0.008))
+		# Sharp attack, exponential decay envelope
+		var envelope: float
+		if t < 0.005:
+			envelope = t / 0.005
+		else:
+			envelope = exp(-5.0 * (t - 0.005))
 
-		# Ignition crack — broadband noise burst
-		var crack = randf_range(-1.0, 1.0) * max(0.0, 1.0 - t / 0.022) * 0.75
+		# === Heavy ignition crack — broadband noise burst ===
+		var crack = randf_range(-1.0, 1.0) * max(0.0, 1.0 - t / 0.016) * 0.70
 
-		# Rocket hiss — decaying noise
-		var hiss = randf_range(-1.0, 1.0) * 0.30 * (1.0 - progress)
+		# === Sub-bass thump on ignition ===
+		var sub = sin(TAU * 50.0 * t) * max(0.0, 1.0 - t / 0.06) * 0.30
 
-		# Low rumble
-		var rumble = sin(TAU * 85.0 * t) * 0.18 * (1.0 - progress * 0.8)
+		# === Rocket motor rush — whooshing filtered noise ===
+		var rush_env = min(t / 0.02, 1.0) * exp(-3.0 * max(0.0, t - 0.04))
+		var rush = randf_range(-1.0, 1.0) * randf_range(0.3, 1.0) * rush_env * 0.30
 
-		var sample_val = (crack + hiss + rumble) * envelope
+		# === Low resonant rumble ===
+		var rumble = sin(TAU * 85.0 * t * (1.0 - progress * 0.2)) * 0.20 * (1.0 - progress * 0.8)
+
+		# === Metallic ping — tube resonance on launch ===
+		var ping = sin(TAU * 680.0 * t) * max(0.0, 1.0 - t / 0.03) * 0.15
+
+		# === Receding hiss ===
+		var hiss = randf_range(-1.0, 1.0) * 0.15 * max(0.0, 1.0 - progress * 1.2)
+
+		var sample_val = (crack + sub + rush + rumble + ping + hiss) * envelope
 		sample_val = tanh(clamp(sample_val, -1.5, 1.5) * 1.3) / tanh(1.3)
 
-		var int_val = int(sample_val * 28000)
+		var int_val = int(sample_val * 30000)
 		data[i * 2] = int_val & 0xFF
 		data[i * 2 + 1] = (int_val >> 8) & 0xFF
 
@@ -53,9 +67,9 @@ func play_launch_sound():
 
 	var player = AudioStreamPlayer2D.new()
 	player.stream = audio
-	player.volume_db = 1.0
-	player.pitch_scale = randf_range(0.92, 1.08)
-	player.max_distance = 2000.0
+	player.volume_db = 2.0
+	player.pitch_scale = randf_range(0.90, 1.10)
+	player.max_distance = 2200.0
 	player.finished.connect(player.queue_free)
 	add_child(player)
 	player.play()

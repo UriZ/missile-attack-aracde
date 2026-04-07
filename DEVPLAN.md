@@ -26,6 +26,9 @@
 - Heat-seeking missiles: increase tracking speed (`tracking_speed` from `3.0` → `5.5`) and increase base velocity slightly
 - Heat-seeker gravity: reduce from `50` → `30` so it stays on target better at angles
 - Goal: make intercepting with heat-seekers feel rewarding, while giving player more reaction time against enemy missiles
+- acquiring a target with heat seeking should be more dramatic and fun - the cursor shold be more reactvie
+- add the voice "pickle is hot" when a heat missile is acquired (when the cursor reacts)
+
 
 **Files:** `heat_seeking_missile.gd`, `main.gd` (`spawn_enemy_missile`)
 
@@ -75,15 +78,30 @@
 - when blsting the mega missiles, i want to see a mega blast
 
 
-### 8 terrain improvements 
+### 8 terrain improvements
+**Status:** ✅ Done
 add improvements to the terrain - add bridges, soldiers, civilian buildings , industry buildings . randomly generate them at the beginning 
+### 8.1 terrain improvemetns advanced
+- add bigger mountains, canions , vallies, revers... more dramamtic landscape
+- add weather scenery - ie. snow, or sun and desert
 
 ### 9 wave
+**Status:** ✅ Done
 - have attack waves of the incoming missiles... generate them, repeat etc
 
 ### 10 add sound for outgoing missiles
 **Status:** ✅ Done
 - add sounds for outgoing missiles
+- add sound for vulkan 
+
+### 11 mega missile split 
+- create a new type of mega missle. when its hit, it splits into multiple smaller fragments than can cause damage 
+
+
+### startup 
+- fix cover image - play button shouldbe nicer and in center
+- add music
+
 
 ## Already Done
 

@@ -7,6 +7,9 @@ var truck_launcher_scene = preload("res://truck_launcher.tscn")
 var heat_seeking_launcher_scene = preload("res://heat_seeking_launcher.tscn")
 var enemy_missile_scene = preload("res://enemy_missile.tscn")
 var super_missile_scene = preload("res://super_missile.tscn")
+var vulkan_cannon_scene = preload("res://vulkan_cannon.tscn")
+var drone_scene = preload("res://drone.tscn")
+var suicide_drone_scene = preload("res://suicide_drone.tscn")
 var terrain_scene = preload("res://terrain.tscn")
 
 var selected_launcher = null
@@ -14,6 +17,10 @@ var enemy_spawn_timer = 0.0
 var enemy_spawn_interval = 3.0  # spawn every 3 seconds
 var super_missile_timer = 0.0
 var super_missile_interval = 12.0  # spawn super missile every 12 seconds
+var drone_timer = 0.0
+var drone_interval = 20.0  # spawn drone every 20 seconds
+var suicide_drone_timer = 0.0
+var suicide_drone_interval = 35.0  # spawn suicide drone every 35 seconds
 var score = 0
 var crosshair_radius = 50.0  # Detection radius for heat-seeking lock
 var game_over = false
@@ -77,6 +84,27 @@ func _process(delta):
 	if super_missile_timer >= super_missile_interval:
 		super_missile_timer = 0.0
 		spawn_super_missile()
+
+	# Spawn drones periodically
+	drone_timer += delta
+	if drone_timer >= drone_interval:
+		drone_timer = 0.0
+		spawn_drone()
+
+	# Spawn suicide drones periodically
+	suicide_drone_timer += delta
+	if suicide_drone_timer >= suicide_drone_interval:
+		suicide_drone_timer = 0.0
+		spawn_suicide_drone()
+
+	# Handle vulkan continuous fire
+	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.name.begins_with("VulkanCannon"):
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			selected_launcher.start_firing()
+		else:
+			selected_launcher.stop_firing()
+		# Update heat bar
+		update_heat_bar()
 
 	# Always update cursor during gameplay
 	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.name.begins_with("HeatSeekingLauncher"):
@@ -221,6 +249,9 @@ func _unhandled_input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		print("Main received click at: ", get_global_mouse_position())
 		if selected_launcher != null:
+			# Vulkan cannon handles its own firing
+			if selected_launcher.name.begins_with("VulkanCannon"):
+				return
 			var target = get_global_mouse_position()
 			print("Firing missile to: ", target)
 			spawn_missile(target)
@@ -246,11 +277,11 @@ func spawn_random_launchers():
 	add_child(truck)
 	truck.launcher_clicked.connect(_on_launcher_selected)
 
-	# Spawn another SAM site
-	var sam2 = sam_launcher_scene.instantiate()
-	sam2.position = Vector2(1900, 1220)
-	add_child(sam2)
-	sam2.launcher_clicked.connect(_on_launcher_selected)
+	# Spawn vulkan cannon
+	var vulkan = vulkan_cannon_scene.instantiate()
+	vulkan.position = Vector2(1900, 1220)
+	add_child(vulkan)
+	vulkan.launcher_clicked.connect(_on_launcher_selected)
 
 func spawn_enemy_missile():
 	var enemy = enemy_missile_scene.instantiate()
@@ -269,6 +300,26 @@ func spawn_enemy_missile():
 
 	add_child(enemy)
 	enemy.launch_to(target, randf_range(3.5, 5.5))
+
+func spawn_drone():
+	var drone = drone_scene.instantiate()
+	add_child(drone)
+	var from_left = randi() % 2 == 0
+	var y_pos = randf_range(450.0, 750.0)
+	drone.init(from_left, y_pos)
+
+func spawn_suicide_drone():
+	var drone = suicide_drone_scene.instantiate()
+	add_child(drone)
+	var side = randi() % 3
+	var spawn_pos: Vector2
+	if side == 0:  # Top
+		spawn_pos = Vector2(randf_range(300.0, 2260.0), -60.0)
+	elif side == 1:  # Left
+		spawn_pos = Vector2(-80.0, randf_range(150.0, 650.0))
+	else:  # Right
+		spawn_pos = Vector2(2640.0, randf_range(150.0, 650.0))
+	drone.init(spawn_pos)
 
 func spawn_super_missile():
 	var super_m = super_missile_scene.instantiate()
@@ -291,6 +342,8 @@ func _on_launcher_selected(launcher):
 
 	if launcher.name.begins_with("HeatSeekingLauncher"):
 		$UI/Info.text = "Heat-Seeking Launcher - aim at enemy missiles"
+	elif launcher.name.begins_with("VulkanCannon"):
+		$UI/Info.text = "VULKAN CANNON - Hold to fire! Watch the heat!"
 	else:
 		$UI/Info.text = "Launcher selected - click to fire"
 
@@ -377,6 +430,8 @@ func build_launcher_hud():
 			icon.color = Color(0.3, 0.5, 0.3, 1)  # Green
 		elif launcher_name.begins_with("HeatSeeking"):
 			icon.color = Color(0.8, 0.5, 0.1, 1)  # Orange
+		elif launcher_name.begins_with("Vulkan"):
+			icon.color = Color(0.8, 0.2, 0.2, 1)  # Red
 		hbox.add_child(icon)
 		
 		# Label with type + key hint
@@ -388,6 +443,8 @@ func build_launcher_hud():
 			type_text = "TRUCK"
 		elif launcher_name.begins_with("HeatSeeking"):
 			type_text = "SEEKER"
+		elif launcher_name.begins_with("Vulkan"):
+			type_text = "VULKAN"
 		label.text = str(i + 1) + " " + type_text
 		label.add_theme_font_size_override("font_size", 16)
 		label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
@@ -433,10 +490,146 @@ func update_launcher_hud():
 			style.set_border_width_all(1)
 			label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
 
+func update_heat_bar():
+	# Show/update heat bar for vulkan cannon
+	if not has_node("UI/HeatBar"):
+		_create_heat_bar()
+	
+	var heat_bar = $UI/HeatBar
+	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.name.begins_with("VulkanCannon"):
+		heat_bar.visible = true
+		var h = selected_launcher.heat
+		var fill = $UI/HeatBar/Fill
+		var glow = $UI/HeatBar/BarGlow
+		fill.size.x = h * 250.0
+		
+		# Color transitions: blue → green → yellow → orange → red
+		if selected_launcher.overheated:
+			# Pulsing red when overheated
+			var pulse = 0.7 + sin(Time.get_ticks_msec() * 0.012) * 0.3
+			fill.color = Color(1, 0.08, 0.02, pulse)
+			glow.color = Color(1, 0.1, 0.0, 0.25 + sin(Time.get_ticks_msec() * 0.015) * 0.15)
+			glow.visible = true
+			$UI/HeatBar/OverheatLabel.visible = true
+			$UI/HeatBar/HeatLabel.add_theme_color_override("font_color", Color(1, 0.3, 0.1, 1))
+		elif h > 0.7:
+			fill.color = Color(1.0, 0.25, 0.05, 0.95)
+			glow.color = Color(1, 0.2, 0.0, h * 0.15)
+			glow.visible = true
+			$UI/HeatBar/OverheatLabel.visible = false
+			$UI/HeatBar/HeatLabel.add_theme_color_override("font_color", Color(1, 0.5, 0.3, 1))
+		elif h > 0.4:
+			fill.color = Color(1.0, 0.65, 0.1, 0.9)
+			glow.visible = false
+			$UI/HeatBar/OverheatLabel.visible = false
+			$UI/HeatBar/HeatLabel.add_theme_color_override("font_color", Color(1, 0.8, 0.4, 0.9))
+		else:
+			fill.color = Color(0.2, 0.85, 0.4, 0.85)
+			glow.visible = false
+			$UI/HeatBar/OverheatLabel.visible = false
+			$UI/HeatBar/HeatLabel.add_theme_color_override("font_color", Color(0.6, 0.8, 0.7, 0.9))
+		
+		# Update segment markers opacity based on heat
+		for i in range(10):
+			var seg_name = "Seg" + str(i)
+			if $UI/HeatBar.has_node(seg_name):
+				var seg = $UI/HeatBar.get_node(seg_name)
+				var seg_threshold = (i + 1) * 0.1
+				if h >= seg_threshold:
+					seg.color.a = 0.6
+				else:
+					seg.color.a = 0.15
+	else:
+		heat_bar.visible = false
+
+func _create_heat_bar():
+	var container = Control.new()
+	container.name = "HeatBar"
+	container.visible = false
+	
+	var bar_x = 10.0
+	var bar_y = 120.0
+	var bar_w = 254.0
+	var bar_h = 22.0
+	
+	# Outer frame (dark border)
+	var frame = ColorRect.new()
+	frame.name = "Frame"
+	frame.position = Vector2(bar_x - 2, bar_y - 2)
+	frame.size = Vector2(bar_w + 4, bar_h + 4)
+	frame.color = Color(0.5, 0.5, 0.55, 0.7)
+	container.add_child(frame)
+	
+	# Background
+	var bg = ColorRect.new()
+	bg.name = "BG"
+	bg.position = Vector2(bar_x, bar_y)
+	bg.size = Vector2(bar_w, bar_h)
+	bg.color = Color(0.06, 0.06, 0.08, 0.9)
+	container.add_child(bg)
+	
+	# Fill bar
+	var fill = ColorRect.new()
+	fill.name = "Fill"
+	fill.position = Vector2(bar_x + 2, bar_y + 2)
+	fill.size = Vector2(0, bar_h - 4)
+	fill.color = Color(0.2, 0.85, 0.4, 0.85)
+	container.add_child(fill)
+	
+	# Segment markers (10 divisions)
+	for i in range(10):
+		var seg = ColorRect.new()
+		seg.name = "Seg" + str(i)
+		seg.position = Vector2(bar_x + (i + 1) * 25.0, bar_y)
+		seg.size = Vector2(2, bar_h)
+		seg.color = Color(1, 1, 1, 0.15)
+		seg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		container.add_child(seg)
+	
+	# Glow effect behind bar (visible at high heat)
+	var glow = ColorRect.new()
+	glow.name = "BarGlow"
+	glow.position = Vector2(bar_x - 6, bar_y - 6)
+	glow.size = Vector2(bar_w + 12, bar_h + 12)
+	glow.color = Color(1, 0.2, 0.0, 0)
+	glow.z_index = -1
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow.visible = false
+	container.add_child(glow)
+	
+	# "HEAT" label
+	var label = Label.new()
+	label.name = "HeatLabel"
+	label.position = Vector2(bar_x + bar_w + 8, bar_y - 1)
+	label.text = "🔥 HEAT"
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color(0.6, 0.8, 0.7, 0.9))
+	container.add_child(label)
+	
+	# Overheat warning — centered flashing text
+	var overheat = Label.new()
+	overheat.name = "OverheatLabel"
+	overheat.position = Vector2(bar_x, bar_y + bar_h + 4)
+	overheat.text = "⚠ OVERHEATED — COOLING DOWN ⚠"
+	overheat.add_theme_font_size_override("font_size", 16)
+	overheat.add_theme_color_override("font_color", Color(1, 0.3, 0.1, 1))
+	overheat.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	overheat.add_theme_constant_override("outline_size", 3)
+	overheat.visible = false
+	container.add_child(overheat)
+	
+	$UI.add_child(container)
+
 func trigger_game_over():
 	game_over = true
 	$UI/GameOver.visible = true
 	Input.set_custom_mouse_cursor(null)
+
+	# Stop vulkan cannon if active
+	if selected_launcher and is_instance_valid(selected_launcher) and selected_launcher.has_method("stop_firing"):
+		selected_launcher.stop_firing()
+	if has_node("UI/HeatBar"):
+		$UI/HeatBar.visible = false
 
 	# Animate game over text
 	var tween = create_tween()
@@ -459,6 +652,8 @@ func start_game():
 	score = 0
 	enemy_spawn_timer = 0.0
 	super_missile_timer = 0.0
+	drone_timer = 0.0
+	suicide_drone_timer = 0.0
 	selected_launcher = null
 
 	# Reset screen shake

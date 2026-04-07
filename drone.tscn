@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://b4dronetscne1"]
+
+[ext_resource type="Script" path="res://drone.gd" id="1_drone"]
+
+[sub_resource type="RectangleShape2D" id="Rect_drone"]
+size = Vector2(80.0, 18.0)
+
+[node name="Drone" type="Area2D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_drone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Rect_drone")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color(0.30, 0.52, 0.75, 1.0)
+polygon = PackedVector2Array(-45, 0, -28, -5, -5, -7, 20, -5, 40, -2, 45, 0, 40, 2, 20, 5, -5, 7, -28, 5)
+
+[node name="Cockpit" type="Polygon2D" parent="Visual"]
+color = Color(0.15, 0.70, 1.0, 1.0)
+polygon = PackedVector2Array(8, -5, 28, -4, 38, 0, 28, 4, 8, 5, 15, 0)
+
+[node name="UpperWing" type="Polygon2D" parent="Visual"]
+color = Color(0.22, 0.42, 0.62, 0.95)
+polygon = PackedVector2Array(-8, -7, 12, -7, -2, -28, -22, -10)
+
+[node name="LowerFin" type="Polygon2D" parent="Visual"]
+color = Color(0.20, 0.38, 0.58, 0.95)
+polygon = PackedVector2Array(-8, 7, 5, 7, -5, 22, -22, 10)
+
+[node name="TailFin" type="Polygon2D" parent="Visual"]
+color = Color(0.25, 0.45, 0.65, 1.0)
+polygon = PackedVector2Array(-35, 0, -50, -14, -47, 0, -50, 5, -35, 1)
+
+[node name="EngineGlow" type="Polygon2D" parent="Visual"]
+color = Color(1.0, 0.7, 0.15, 1.0)
+polygon = PackedVector2Array(-48, 0, -44, -4, -40, 0, -44, 4)

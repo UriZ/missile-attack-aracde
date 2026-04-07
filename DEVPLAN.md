@@ -32,7 +32,7 @@
 ---
 
 ### 4. Enemy Drones
-**Status:** Planned — design phase
+**Status:** ✅ Done
 
 - Slow-moving aerial units that fly horizontally across the screen
 - Different threat profile from missiles: constant direction, lower altitude, harder to intercept with SAM
@@ -59,7 +59,31 @@
 **New files:** `nuke.gd`, `nuke.tscn`
 **Modified files:** `main.gd` (spawn logic, wave system), `explosion.gd` or new `nuke_explosion.tscn`
 
+
+### 6. vulkan cannon
+**Status:** ✅ Done
+- Multi-barrel rapid-fire cannon (hold to fire, ~14 rounds/sec)
+- Overheat system: heat builds per shot, locks out at 100%, recovers at 30%
+- Visual: 3 barrels with rotating barrel group, heat glow overlay, ammo boxes
+- HUD: heat bar in top-left, overheat warning label
+- Tracer bullets: fast (1800px/s), small explosions on hit, no terrain damage
+
 ---
+
+### 7 ui fixes launchers and missiles
+- add wheels to the truck, and chains (lime in a tank) to the sam launcher
+- when blsting the mega missiles, i want to see a mega blast
+
+
+### 8 terrain improvements 
+add improvements to the terrain - add bridges, soldiers, civilian buildings , industry buildings . randomly generate them at the beginning 
+
+### 9 wave
+- have attack waves of the incoming missiles... generate them, repeat etc
+
+### 10 add sound for outgoing missiles
+**Status:** ✅ Done
+- add sounds for outgoing missiles
 
 ## Already Done
 
@@ -75,3 +99,4 @@
 - [x] Screen shake
 - [x] Launcher selection HUD (basic)
 - [x] Crosshair always visible during gameplay; reactive for heat-seeker (default/heat/locked modes)
+- [x] Vulkan cannon with overheat mechanic

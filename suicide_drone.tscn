@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://suicidedrone1"]
+
+[ext_resource type="Script" path="res://suicide_drone.gd" id="1_sdrone"]
+
+[sub_resource type="CircleShape2D" id="Circle_sdrone"]
+radius = 24.0
+
+[node name="SuicideDrone" type="Area2D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_sdrone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Circle_sdrone")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color(0.65, 0.10, 0.08, 1.0)
+polygon = PackedVector2Array(-40, 0, -24, -5, -2, -6, 18, -4, 36, -2, 42, 0, 36, 2, 18, 4, -2, 6, -24, 5)
+
+[node name="Cockpit" type="Polygon2D" parent="Visual"]
+color = Color(1.0, 0.20, 0.05, 1.0)
+polygon = PackedVector2Array(5, -4, 24, -3, 36, 0, 24, 3, 5, 4, 12, 0)
+
+[node name="UpperWing" type="Polygon2D" parent="Visual"]
+color = Color(0.50, 0.08, 0.06, 0.95)
+polygon = PackedVector2Array(-5, -6, 14, -6, -6, -28, -24, -9)
+
+[node name="LowerWing" type="Polygon2D" parent="Visual"]
+color = Color(0.50, 0.08, 0.06, 0.95)
+polygon = PackedVector2Array(-5, 6, 14, 6, -6, 28, -24, 9)
+
+[node name="TailFin" type="Polygon2D" parent="Visual"]
+color = Color(0.45, 0.08, 0.06, 1.0)
+polygon = PackedVector2Array(-32, 0, -48, -13, -44, 0, -48, 5, -32, 1)
+
+[node name="EngineGlow" type="Polygon2D" parent="Visual"]
+color = Color(1.0, 0.35, 0.0, 1.0)
+polygon = PackedVector2Array(-44, 0, -40, -5, -35, 0, -40, 5)
